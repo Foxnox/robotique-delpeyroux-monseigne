@@ -16,7 +16,6 @@ def radian_validation (radian):
 def leg_dk(theta1, theta2, theta3, l1=L1, l2=L2, l3=L3, alpha = Alpha, beta = Beta):
 	x = y = z = "error"
 	if radian_validation(theta1) and radian_validation(theta2) and radian_validation(theta3) and radian_validation(alpha) and radian_validation(beta):
-		
 		#Storing all the sinus and cosinus into variable in order to simplify and run the calculation only once
 		c_1 = math.cos(theta1)
 		c_2 = math.cos(theta2)
@@ -35,6 +34,7 @@ def leg_dk(theta1, theta2, theta3, l1=L1, l2=L2, l3=L3, alpha = Alpha, beta = Be
 		delta_x = c_1*projection_delta
 		delta_y = s_1*projection_delta
 		delta_z = (l2 * s_a) + (l3 * c_b)
+		
 		#Calculation of the final position
 		x = (projection * c_1) - delta_x
 		y = (projection * s_1) - delta_y
