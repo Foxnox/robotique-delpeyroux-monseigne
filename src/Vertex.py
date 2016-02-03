@@ -20,7 +20,15 @@ class Vertex:
 
 	#Surcharge str
 	def __str__(self):
-		return ("(%.2f, %.2f, %.2f)" % (self.posx,self.posy,self.posz))
+		temp = self
+		if (-0.01 < self.posx and self.posx < 0.01):
+			temp.posx=0.0
+		if (-0.01 < self.posy and self.posy < 0.01):
+			temp.posy=0.0
+		if (-0.01 < self.posz and self.posz < 0.01):
+			temp.posz=0.0
+		
+		return ("(%.2f, %.2f, %.2f)" % (temp.posx,temp.posy,temp.posz))
 
 	#Surcharge +=
 	def __iadd__(self, other):
