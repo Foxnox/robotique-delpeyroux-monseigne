@@ -4,6 +4,39 @@
 import serial
 import math
 
+class Data:
+	start = 0xff
+	id = 0x00
+	lenght = 0x00
+	instruction = 0x00
+	param1 = 0x00
+	param2 = 0x00
+	param3 = 0x00
+	checksum = 0x00
+	data = ''
+	
+	def __init__(self, start = 0xff, id = 0x00, lenght = 0x00, instruction = 0x00, param1 = 0x00, param2 = 0x00, param3 = 0x00):
+		self.start = start
+		self.id = id
+		self.lenght = lenght
+		self.instruction = instruction
+		self.param1 = param1
+		self.param2 = param2
+		self.param3 = param3
+		self.checksum = id + lenght + instruction
+		self.data = chr(start) + chr(start) + chr(id) + chr(lenght) + chr(instruction)
+		if lenght > 2
+			self.data +=chr(param1)
+			self.checksum += param1
+			if lenght > 3
+				self.data +=chr(param2)*
+				self.checksum += param2
+				if lenght > 4
+					self.data +=chr(param3)
+					self.checksum += param3
+					
+		self.checksum = ~(self.checksum) & 255
+		self.data += self.checksum
 
 def open_serial(port, baud, to):
 	ser = serial.Serial(port=port, baudrate=baud, timeout=to)
