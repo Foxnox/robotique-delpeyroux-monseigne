@@ -17,8 +17,8 @@ def al_kashi (a, b , c):
 def leg_ik(x, y, z, l1=L1, l2=L2, l3=L3, alpha = Alpha, beta = Beta):
 	l_max = l1+l2+l3
 	l_proj = sqrt(x*x + y*y)
-	if ((x*x + y*y + z*z) <= l_max*l_max):	#On limite à une sphère de rayon longueur max 
-		d13 = l_proj - l1					#Distance entre P1 et le projeté de P3
+	if ((x*x + y*y + z*z) <= l_max*l_max):	#On limite a une sphere de rayon longueur max 
+		d13 = l_proj - l1					#Distance entre P1 et le projete de P3
 		d = sqrt(z*z + d13*d13)				#Distance entre P1 et P3
 		
 		#Calcul de a l'angle P3proj-P1-P3
@@ -28,26 +28,26 @@ def leg_ik(x, y, z, l1=L1, l2=L2, l3=L3, alpha = Alpha, beta = Beta):
 			a = atan2(z, d13)
 		
 		#Calcul de b l'angle P2-P1-P3
-		if (d==0):							#Cas mécaniquement impossible de toute façon (car L3!=L2)
+		if (d==0):							#Cas mecaniquement impossible de toute facon (car L3!=L2)
 			b = 0							
 		else:
 			b = al_kashi(l3, l2, d)
 		
-		if (x == 0):						#On evite les méchantes divisions par 0 
-			theta1 = pi/2					#90°
+		if (x == 0):						#On evite les mechantes divisions par 0 
+			theta1 = pi/2					#90
 		elif (x < 0 and y == 0) :			#On est sur l'autre cadran 
-			theta1=pi						#180°
+			theta1=pi						#180
 		else:
 			theta1 = atan2(y, x)			#==atan(y/x)
 			
-		theta2 = - (b + a + alpha)			#alpha est la compensation mécanique
+		theta2 = - (b + a + alpha)			#alpha est la compensation mecanique
 		theta3 = - (pi - al_kashi(d, l3, l2) - ((pi/2) - alpha - beta))	#180 - angle P1-P2-P3 - Compensation mecanique
 			
 		angle = Vertex(degrees(theta1), degrees(theta2), degrees(theta3))
-		print("Voici les angles en degrees : " + str(angle))
+		return angle
 	else:
-		print("Ce n'est pas une super pate extensible")
-	#Pour le moment on ne gère qu'une longueur max il faudra prendre en compte la conjugaison des 3 angles en fonctions des L1, L2, L3 pour précisé les lieux impossibles
+		raise ValueError("Impossible position")
+	#Pour le moment on ne gere qu'une longueur max il faudra prendre en compte la conjugaison des 3 angles en fonctions des L1, L2, L3 pour precise les lieux impossibles
 
 	
 leg_ik(118.79, 0.0, -115.14)

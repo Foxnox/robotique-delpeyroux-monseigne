@@ -17,9 +17,9 @@ def radValidation (radian):
 def leg_dk(theta1, theta2, theta3, l1=L1, l2=L2, l3=L3, alpha = Alpha, beta = Beta):
 	Angle = Vertex(theta1,theta2,theta3)
 	#Modification de theta 2 et theta 3 en fonction des contraintes mecaniques
-	theta2	+=	alpha
+	theta2  +=  alpha
 	theta3	=	90-(alpha+beta+theta3)
-	
+	#print "Angles : " + str(theta1) + " ; " + str(theta2) + " ; " + str(theta3)
 	theta1=radians(theta1)
 	theta2=-radians(theta2)
 	theta3=-radians(theta3)
@@ -37,9 +37,8 @@ def leg_dk(theta1, theta2, theta3, l1=L1, l2=L2, l3=L3, alpha = Alpha, beta = Be
 	
 	#Calculation of the final position
 	Final = Vertex((projection * c_1), (projection * s_1), ((l2 * s_2) + (l3 * s_2_3)))
-
-	print ("Avec les angles : " + str(Angle) + "\tOn arrive a : " + str(Final))
-
+	
+	return Final
 
 
 leg_dk(0, 0, 0)

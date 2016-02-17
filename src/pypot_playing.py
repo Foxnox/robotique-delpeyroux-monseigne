@@ -5,8 +5,18 @@ import pypot.dynamixel
 import inverse_kinematics
 import direct_kinematics
 
-def get_position (dxl_io, theta1, theta2, theta2):
-	direct_kinematics.leg_dk(theta1, theta2, theta3)
+def get_position (angles):
+	pos = direct_kinematics.leg_dk(angles[2], angles[1], angles[0])
+	return [ pos.posx, pos.posy, pos.posz ]
+	
+def get_angles (pos):
+	angles = inverse_kinematics.leg_ik(pos[0], pos[1], pos[2])
+	return [ angles.posz, angles.posy, angles.posx ]
+	
+def goto (dxl_io, pos, ids):
+	angles = get_angles(pos)
+	cmd = dict(zip(ids, angles))
+	dxl_io.set_goal_position(cmd)
 
 def sinusoide (dxl_io, a, f, ids) : 
 	initial_time = time.time()
@@ -30,35 +40,32 @@ if __name__ == '__main__':
 	with pypot.dynamixel.DxlIO('/dev/ttyUSB0', baudrate=1000000) as dxl_io:
 
 		# we can scan the motors
-		found_ids = [10, 11, 12]
+		ids = [10, 11, 12]
 		
 		# we power on the motors
-		dxl_io.enable_torque(found_ids)
-
+		dxl_io.disable_torque(ids)
 		# we get the current positions
-		print 'Current pos:', dxl_io.get_present_position(found_ids)
-
-		#	found_ids[0] -> 3 (ID inscrite sur le moteur)
-		#	found_ids[1] -> 14 (ID inscrite sur le moteur)
-		#	found_ids[2] -> 17 (ID inscrite sur le moteur) 
-		# we create a python dictionnary: {id0 : position0, id1 : position1...}
-		ids = { found_ids[0] : 11, found_ids[1] : 12, found_ids[2] : 10}
-		#print 'Cmd:', pos
 		
-		i = 0
-		final_ids = found_ids[:]
-		for key, value in ids.iteritems() : 
-			final_ids[i] = change_id(dxl_io, key, value)
-			i += 1
-
-		print "Final Ids : ", final_ids
+		pos = dxl_io.get_present_position(ids)
+		print 'Current pos (angles):', pos
+		
+		space_pos = get_position(pos)
+		print 'Current pos (in space - DK):', space_pos
+		
+		angles_pos = get_angles(space_pos)
+		print 'Current pos (angles - IK):', angles_pos
+		
+		
+		
+		while True : 
+			target = [200, 0, 0]
+			target[0] = float(raw_input("Please enter a X coordinate: "))
+			target[1] = float(raw_input("Please enter a Y coordinate: "))
+			target[2] = float(raw_input("Please enter a Z coordinate: "))
+			print ""
+			goto(dxl_io, target, ids)
 		# we send these new positions
 		#dxl_io.set_goal_position(pos)
 		
 		#sinusoide(dxl_io, 10, 0.5, found_ids)
 		
-		time.sleep(1)  # we wait for 1s
-
-		# we power off the motors
-		dxl_io.disable_torque(final_ids)
-		time.sleep(1)  # we wait for 1s
