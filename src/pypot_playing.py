@@ -36,37 +36,40 @@ def change_id (dxl_io, old_id, new_id):
 		return new_id
 
 if __name__ == '__main__':
-	# we first open the Dynamixel serial port
+	# On ouvre le port
 	with pypot.dynamixel.DxlIO('/dev/ttyUSB0', baudrate=1000000) as dxl_io:
 		
+		#Test pour trouver les IDs cela ne marche plus si un cable est deffectueux (il ne trouvera rien)
 		#found_ids = dxl_io.scan()
 		#print found_ids
 		
-		# we can scan the motors
+		# Normalement ce sont les bonnes ids 
  		ids = [[11, 12, 13], [21, 22, 23], [31, 32, 33], [41, 42, 43], [51, 52, 53], [61, 62, 63]]
 
+		# Au cas ou on doit changer les IDs
 		#dxl_io.change_id(dict(zip(ids, found_ids)))
 		
 		found_ids = dxl_io.scan()
 		print found_ids
 		
-		# we power on the motors
+		# On allume les moteurs
 		for i in xrange(0, 6):
 			print i
 			dxl_io.disable_torque(ids[i])
-		# we get the current positions
 		
+		# Recuperation de la position actuelle
 		# pos = dxl_io.get_present_position(ids)
-		# print 'Current pos (angles):', pos
+		# print 'Position actuelle (angles):', pos
 		# 
 		# space_pos = get_position(pos)
-		# print 'Current pos (in space - DK):', space_pos
+		# print 'Position actuelle (in space - DK):', space_pos
 		# 
 		# angles_pos = get_angles(space_pos)
-		# print 'Current pos (angles - IK):', angles_pos
+		# print 'Position actuelle (angles - IK):', angles_pos
 		
 		
-		
+		# Petit test ou on change la position d'une pate avec une suite de position target
+		#targets = [[170, -45, 35], [170, -45, 0], [170, -45, 35], [170, 0, 35], [170, 0, 0], [170, 0, 35], [170, 45, 35], [170, 45, 0], [170, 45, 35]]
 		# while True:
 		# 	for target in targets : 
 		# 		goto(dxl_io, target, ids)
@@ -75,15 +78,13 @@ if __name__ == '__main__':
 		
 		while True : 
 			target = [200, 0, 0]
-			nb = int(raw_input("Please enter the pod number: "))
-			target[0] = float(raw_input("Please enter a X coordinate: "))
-			target[1] = float(raw_input("Please enter a Y coordinate: "))
-			target[2] = float(raw_input("Please enter a Z coordinate: "))
+			nb = int(raw_input("Veuillez entrer un numero de pate : "))
+			target[0] = float(raw_input("Veuillez entrer une position sur X : "))
+			target[1] = float(raw_input("Veuillez entrer une position sur Y : "))
+			target[2] = float(raw_input("Veuillez entrer une position sur Z : "))
 			print ""
-			goto(dxl_io, target, ids[nb])
-			
-		# we send these new positions
-		#dxl_io.set_goal_position(pos)
+			goto(dxl_io, target, ids[nb])		# On part sur la nouvelle position
 		
+		# Petit test ou on change la position sur une sinusoide en fonction du temps 
 		#sinusoide(dxl_io, 10, 0.5, found_ids)
 		

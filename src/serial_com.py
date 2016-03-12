@@ -77,7 +77,7 @@ def ping_all_ids (serial_port):
 		param2 = 0x00
 		checksum = get_checksum(id + lenght + instruction)
 		
-		#Transformation en Char des caractères Hexa
+		#Transformation en Char des caracteres Hexa
 		data_start = to_hex(start)
 		data_id = to_hex(id)
 		data_lenght = to_hex(lenght)
@@ -103,7 +103,7 @@ def read_pos (serial_port, target):
 	param2 = 0x01		# taille de la position en memoire
 	checksum = get_checksum(id + lenght + instruction + param1 + param2)
 
-	#Transformation en Char des caractères Hexa
+	#Transformation en Char des caracteres Hexa
 	data_start = to_hex(start)
 	data_id = to_hex(id)
 	data_lenght = to_hex(lenght)
@@ -123,13 +123,13 @@ def write_pos (serial_port, target, value):
 	start = 0xff
 	id = target
 	lenght = 0x05 			# lenght = 2 + nombres de parametres
-	instruction = 0x03 		# action d'écriture, prend 2 parametres
+	instruction = 0x03 		# action d'ecriture, prend 2 parametres
 	param1 = 0x1e 			# adresse de la position
 	param2 = value & 255	# taille de la position en memoire
 	param3 = value >> 8		#
 	checksum = get_checksum(id + lenght + instruction + param1 + param2)
 	
-	#Transformation en Char des caractères Hexa
+	#Transformation en Char des caracteres Hexa
 	data_start = to_hex(start)
 	data_id = to_hex(id)
 	data_lenght = to_hex(lenght)
@@ -147,6 +147,6 @@ def write_pos (serial_port, target, value):
 
 if __name__ == '__main__':
 
-	# Ouverture du port USB0 à uen fréquence de 1000000Hz (1MHz) et un timeout de 0.1 
+	# Ouverture du port USB0 a uen frequence de 1000000Hz (1MHz) et un timeout de 0.1 
 	serial_port = open_serial('/dev/ttyUSB0', 1000000 , 0.1)
 	read_pos(serial_port, 14)

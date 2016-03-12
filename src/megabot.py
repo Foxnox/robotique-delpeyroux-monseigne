@@ -22,6 +22,8 @@ def megabot_goto (megabot, leg, pos, duration):
 
 
 if __name__ == '__main__':
+	#On va maintenant utiliser un fichier de configuration
+	#Il nous permettra de limiter nos demandes aux angles valides
 	with closing(pypot.robot.from_json('config.json')) as megabot:
 		for m in megabot.motors : 
 			m.compliant = False;
