@@ -51,7 +51,7 @@
 			"orientation": "direct", 
 			"type": "AX-12", 
 			"id": 21, 
-			"angle_limit": [-100, 0], 
+			"angle_limit": [0, 100], 
 			"offset": 0.0
 		}, 
 		"motor_22":
@@ -75,7 +75,7 @@
 			"orientation": "direct", 
 			"type": "AX-12", 
 			"id": 31, 
-			"angle_limit": [0, 100], 
+			"angle_limit": [-100, 0], 
 			"offset": 0.0
 		},
 		"motor_32":
@@ -123,7 +123,7 @@
 			"orientation": "direct", 
 			"type": "AX-12", 
 			"id": 51, 
-			"angle_limit": [-100, 0], 
+			"angle_limit": [0, 100], 
 			"offset": 0.0
 		}, 
 		"motor_52":
@@ -147,7 +147,7 @@
 			"orientation": "direct", 
 			"type": "AX-12", 
 			"id": 61, 
-			"angle_limit": [0, 100], 
+			"angle_limit": [-100, 0], 
 			"offset": 0.0
 		}, 
 		"motor_62":
