@@ -41,10 +41,9 @@ class corrected_leg:
 	def get_corrected_angle(self, initial_angle):
 		return initial_angle - self.delta_angle
 		
-	def goto_angle_dist(self, angle, dist):
-		my_angle = self.get_corrected_angle(angle)
-		dy = math.sin(math.radians(my_angle)) * dist 
-		dx = math.cos(math.radians(my_angle)) * dist
+	def goto(self, pos):
+		dy = math.cos(math.radians(-self.delta_angle)) * pos[0] +  math.sin(math.radians(-self.delta_angle)) * pos[1]
+		dx = (-1 * math.sin(math.radians(-self.delta_angle)) * pos[0]) +  math.cos(math.radians(-self.delta_angle)) * pos[1]
 		
 		goal_pos = [center_pos[0]+dx, center_pos[1]+dy, center_pos[2]]
 		leg_goto(self.leg, goal_pos)
@@ -56,9 +55,9 @@ class corrected_robot:
 	def __init__(self, legs):
 		self.legs = legs
 	
-	def goto_angle_dist(self, angle, dist):
+	def goto(self, pos):
 		for l in self.legs:
-			l.goto_angle_dist(angle, dist)
+			l.goto(pos)
 	
 def position_centre (megabot, deltax, deltay, time):
 	z=-100
@@ -134,16 +133,22 @@ if __name__ == '__main__':
 			
 		robot = corrected_robot([leg1, leg2, leg3, leg4, leg5, leg6])
 
-		position_centre(megabot, 0,0,0.2)
+		robot.goto([0, 0])
 		
-		time.sleep(3)
-		angle = 0
-		while True:
-			robot.goto_angle_dist(angle, 30)
-			angle += 20
-			if (angle == 360):
-				angle = 0
-			time.sleep(0.8)
+		time.sleep(1)
+		
+		i = 0
+		f = 100
+		while True : 
+			bla = (1.0*i/f) * (2 * math.pi * 50) * 1.0/f 
+			x = math.cos(bla)*50
+			y = math.sin(bla)*50
+			
+			robot.goto([x, y])
+			i += 1
+			
+			time.sleep(1.0/f)
+		
 
 
 		
