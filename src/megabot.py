@@ -115,38 +115,35 @@ class corrected_robot:
 	def moveto(self, pos, speed, amp):
 		t = ((self.actual_time-self.last_period_time)/(speed))
 		z = amp * math.sin(math.pi * t)
-		target_pos = [pos[0], pos[1], pos[2]]
+		old_pos = [pos[0], pos[1], pos[2]]
 		pos[0] = pos[0] * t 
 		pos[1] = pos[1] * t 
-		alt_pos = [-1 * pos[0], -1 * pos[1], pos[2]]
+		alt_pos = [old_pos[0] - pos[0], old_pos[1] - pos[1], pos[2]]
 		pos[2] = z
 		if self.state == -1 : # RIGTH LEGS
 			for l in self.rigth_legs:
-				l.goto(pos, l.leg_buffer)
+				l.goto(pos,)
 			for l in self.left_legs : 
-				l.goto(alt_pos, l.leg_buffer)
+				l.goto(alt_pos)
 		else : # LEFT LEGS
 			for l in self.left_legs:
-				l.goto(pos, l.leg_buffer)
+				l.goto(pos,)
 			for l in self.rigth_legs:
-				l.goto(alt_pos, l.leg_buffer)
+				l.goto(alt_pos)
 		self.actual_time = time.clock() * 1000
 		if ((self.actual_time - speed) >= self.last_period_time):
-			if state == -1 : 
-				for l in self.rigth_legs:
-					l.leg_buffer = target_pos
-				for l in self.left_legs : 
-					l.leg_buffer = center_pos
-			else : 
-				for l in self.left_legs:
-					l.leg_buffer = target_pos
-				for l in self.rigth_legs : 
-					l.leg_buffer = center_pos
 			self.last_period_time = self.actual_time
 			self.state = -1 *  self.state
 
-#BOUCLE INFINIE
 
+def between ( x,  val1, val2) : # return val1 <= x <= val2
+	return (val1 <= x and x <= val2)
+	
+def outof ( x,  val1, val2) : # return val1 > x  or  x > val2
+	return (not(between(x, val1, val2)))
+	
+def check_speed_axis_for_gaz (speed_axis, gaz) : 
+	return (outof(speed_axis, -0.1, 0.1) and not(gaz)) or ( between(speed_axis, -0.1, 0.1) and gaz )
 
 if __name__ == '__main__':
 
@@ -180,19 +177,26 @@ if __name__ == '__main__':
 
 		robot.goto([0, 0, 0])
 	
-			
-		continuer = 1
+		
+		continuer = True
 		gaz=False
 		remind_button = 0
+		button = 0
+		joy_x_axis = 0
+		joy_y_axis = 0
+		speed_axis = 0
+		
 		while continuer:
 			
-			button = joystick.get_button(3)
-			joy_x_axis = joystick.get_axis(0)
-			joy_y_axis = joystick.get_axis(1)
+			if is_joystick : 
+				button = joystick.get_button(3)
+				joy_x_axis = joystick.get_axis(0)
+				joy_y_axis = joystick.get_axis(1)
+				speed_axis = joystick.get_axis(2)
 			
 			for event in pygame.event.get():	#Attente des evenements
 				if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
-					continuer = 0
+					continuer = False
 				if event.type == KEYDOWN and event.key == K_TAB:
 							is_joystick = not(is_joystick)
 							is_mouse = not(is_mouse)
@@ -200,7 +204,7 @@ if __name__ == '__main__':
 					#On change les coordonnees du Reticule
 					Reticulte_x = event.pos[0]-L_Reticule/2
 					Reticulte_y = event.pos[1]-H_Reticule/2
-				if (event.type == MOUSEBUTTONDOWN) or (event.type == KEYDOWN and event.key == K_SPACE) or (button==1):
+				if (event.type == MOUSEBUTTONDOWN) or (event.type == KEYDOWN and event.key == K_SPACE) or button==1  or (outof(speed_axis, -0.1, 0.1) and not(gaz)) or check_speed_axis_for_gaz(speed_axis, gaz) :
 					gaz = not(gaz)
 					if gaz == 1 :
 						Reticule = pygame.image.load("../Ressources/Red_Reticule.png").convert_alpha()
@@ -209,24 +213,20 @@ if __name__ == '__main__':
 						Reticule = pygame.image.load("../Ressources/Reticule.png").convert_alpha()
 						Reticule = pygame.transform.scale(Reticule, (L_Reticule, H_Reticule))	
 
+
 			if is_joystick :
 				Reticulte_x = L_Fenetre/2 + (L_Fenetre/2 * joy_x_axis) -L_Reticule/2		
-				Reticulte_y = H_Fenetre/2 + (H_Fenetre/2 * joy_y_axis) -H_Reticule/2			
+				Reticulte_y = H_Fenetre/2 + (H_Fenetre/2 * joy_y_axis) -H_Reticule/2	
+				
+			
+			period = 1700 - (math.fabs(speed_axis)*1500)
 			#Re-collage
 			fenetre.blit(fond, (0,0))	
 			fenetre.blit(Reticule, (Reticulte_x, Reticulte_y))
-			if gaz and (math.fabs(joy_x_axis) > 0.1 or math.fabs(joy_y_axis) > 0.1) : 
-				robot.moveto([(Reticulte_x - L_Fenetre/2)/coeff_distance, (Reticulte_y - H_Fenetre/2)/coeff_distance, 0], 1500, 35)
+			if gaz : 
+				robot.moveto([(Reticulte_x - L_Fenetre/2)/coeff_distance, (Reticulte_y - H_Fenetre/2)/coeff_distance, 0], period, 35)
 			else : 
 				robot.goto([(Reticulte_x - L_Fenetre/2)/coeff_distance, (Reticulte_y - H_Fenetre/2)/coeff_distance, 0])
 			remind_button = button
 			#Rafraichissement
 			pygame.display.flip()
-		
-
-
-		
-		
-		
-		
-		
