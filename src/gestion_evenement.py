@@ -79,8 +79,8 @@ while continuer:
 					Reticule = pygame.transform.scale(Reticule, (L_Reticule, H_Reticule))	
 	
 	if is_joystick :
-		Reticulte_x = 300 + (300 * joy_x_axis) -L_Reticule/2		
-		Reticulte_y = 300 + (300 * joy_y_axis) -H_Reticule/2		
+		Reticulte_x = L_Fenetre/2 + (L_Fenetre/2 * joy_x_axis) -L_Reticule/2		
+		Reticulte_y = H_Fenetre/2 + (H_Fenetre/2 * joy_y_axis) -H_Reticule/2		
 	#Re-collage
 	fenetre.blit(fond, (0,0))	
 	fenetre.blit(Reticule, (Reticulte_x, Reticulte_y))
