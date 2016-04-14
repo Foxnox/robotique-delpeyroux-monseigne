@@ -20,7 +20,10 @@ L_Reticule = 50
 limit_distance=50
 coeff_distance=(L_Fenetre/2)/limit_distance
 
-center_pos = [100, 0, -100]
+initial_altitude = -90
+alt_var = 20
+center_pos = [100, 0, initial_altitude]
+
 is_mouse = True
 is_joystick = False
 joy_x_axis = 0
@@ -144,6 +147,9 @@ def outof ( x,  val1, val2) : # return val1 > x  or  x > val2
 	
 def check_speed_axis_for_gaz (speed_axis, gaz) : 
 	return (outof(speed_axis, -0.1, 0.1) and not(gaz)) or ( between(speed_axis, -0.1, 0.1) and gaz )
+	
+def update_center_pos_z(z):
+	center_pos[2] = z
 
 if __name__ == '__main__':
 
@@ -185,6 +191,7 @@ if __name__ == '__main__':
 		joy_x_axis = 0
 		joy_y_axis = 0
 		speed_axis = 0
+		alt_axis = 0
 		
 		while continuer:
 			
@@ -193,6 +200,7 @@ if __name__ == '__main__':
 				joy_x_axis = joystick.get_axis(0)
 				joy_y_axis = joystick.get_axis(1)
 				speed_axis = joystick.get_axis(2)
+				alt_axis = joystick.get_axis(6)
 			
 			for event in pygame.event.get():	#Attente des evenements
 				if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
@@ -220,6 +228,8 @@ if __name__ == '__main__':
 				
 			
 			period = 1700 - (math.fabs(speed_axis)*1500)
+			new_altitude = initial_altitude - ( alt_axis * alt_var)
+			update_center_pos_z(new_altitude)
 			#Re-collage
 			fenetre.blit(fond, (0,0))	
 			fenetre.blit(Reticule, (Reticulte_x, Reticulte_y))
