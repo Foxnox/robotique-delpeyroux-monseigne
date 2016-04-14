@@ -14,13 +14,13 @@ from pygame.locals import *	#Import de Pygame locals en direct
 T_Fenetre = 600						#Hauteur Fenetre
 Fenetre_2 = T_Fenetre/2				#Fenetre/2 souvent utilise
 T_Reticule = 50						#Taille Reticule
-Reticule_2 = Reticule_2			#Reticule/2 souvent utilise
+Reticule_2 = T_Reticule/2			#Reticule/2 souvent utilise
 
 Limit_Dist=50						#Distance Limite
-#Ce n'est pas une limite r�elle c'est utile pour avoir 
-#un ratio coh�rent en fonction de la position du curseur
+#Ce n'est pas une limite reelle c'est utile pour avoir 
+#un ratio coherent en fonction de la position du curseur
 Coeff_Dist = Fenetre_2/Limit_Dist	#Ratio en question
-Pos_Center = [100, 0, -100]			#Position par d�faut du robot
+Pos_Center = [100, 0, -100]			#Position par defaut du robot
 Is_Mouse = True						#Gestion de la souris
 Is_Joystick = False					#ou du Joystick (par ergonomie l'un desactive l'autre)
 Joy_X_Axis = 0						#Position du Joystick sur X
@@ -65,7 +65,7 @@ pygame.display.flip()
 def get_angles (pos):
 	angles = inverse_kinematics.leg_ik(pos[0], pos[1], pos[2])
 	return [ angles.posx, angles.posy, angles.posz ]
-#Ordonne � la jambe d'atteindre une position
+#Ordonne a la jambe d'atteindre une position
 def leg_goto(leg, pos):
 	angles = get_angles(pos)
 	i = 0
@@ -88,12 +88,17 @@ class corrected_leg:
 	def get_corrected_angle(self, initial_angle):
 		return initial_angle - self.delta_angle
 		
-	def goto(self, pos, ref = Pos_Center):
+	def goto(self, pos, absolute = False, ref = Pos_Center):
 		Angle_Rad = math.radians(-self.delta_angle)
-		dy = math.cos(Angle_Rad) * pos[0] +  math.sin(Angle_Rad) * pos[1]
-		dx = (-1 * math.sin(Angle_Rad) * pos[0]) +  math.cos(Angle_Rad) * pos[1]
-		
+		if not(absolute) :
+			dy = math.cos(Angle_Rad) * pos[0] +  math.sin(Angle_Rad) * pos[1]
+			dx = (-1 * math.sin(Angle_Rad) * pos[0]) +  math.cos(Angle_Rad) * pos[1]
+		else:
+			dx = pos[0]
+			dy = pos[1]
 		Goal_Pos = [ref[0]+dx, ref[1]+dy, ref[2] + pos[2]]
+		
+		
 		leg_goto(self.leg, Goal_Pos)
 
 #Positionnement "correct" du Robot
@@ -119,7 +124,7 @@ class corrected_robot:
 		for l in self.legs:
 			l.goto(pos)
 	
-	def moveto(self, pos, speed, amp):
+	def moveto(self, pos, speed, amp, absolute = False):
 		t = ((self.actual_time-self.last_period_time)/(speed))
 		z = amp * math.sin(math.pi * t)
 		old_pos = [pos[0], pos[1], pos[2]]
@@ -135,14 +140,15 @@ class corrected_robot:
 			L_pos = pos
 
 		for l in self.left_legs:
-			l.goto(L_pos)
+			l.goto(L_pos, absolute)
 		for l in self.rigth_legs:
-			l.goto(R_pos)
+			l.goto(R_pos, absolute)
 
 		self.actual_time = time.clock() * 1000
 		if ((self.actual_time - speed) >= self.last_period_time):
 			self.last_period_time = self.actual_time
 			self.state = -1 *  self.state
+			
 
 ##********** TESTS **********##
 #Simplification Between
@@ -191,13 +197,16 @@ if __name__ == '__main__':
 	
 		
 		continuer = True
-		gaz=False
+		Gaz=False
+		circle = False
 		remind_button = 0
 		button = 0
 		joy_x_axis = 0
 		joy_y_axis = 0
-		speed_axis = 0
+		Speed_Axis = 0.8
 		alt_axis = 0
+		circle_rigth = False
+		circle_left = False
 		
 		while continuer:
 			
@@ -215,13 +224,13 @@ if __name__ == '__main__':
 				if event.type == KEYDOWN and event.key == K_TAB:
 							Is_Joystick = not(Is_Joystick)
 							Is_Mouse = not(Is_Mouse)
-				#Mouvement de la souris si elle est utilis�e
+				#Mouvement de la souris si elle est utilisee
 				if Is_Mouse and event.type == MOUSEMOTION :
 					#On change les coordonnees du Reticule
 					Ret_x = event.pos[0]-Reticule_2
 					Ret_y = event.pos[1]-Reticule_2
 				#Activation des Gaz Si clic souris, espace ou activation des Gaz
-				if (event.type == MOUSEBUTTONDOWN) or (event.type == KEYDOWN and event.key == K_SPACE) or check_Speed_Axis(Speed_Axis, Gaz) :
+				if (event.type == MOUSEBUTTONDOWN) or (event.type == KEYDOWN and event.key == K_SPACE) or (check_Speed_Axis(Speed_Axis, Gaz) and not(is_mouse)) :
 					Gaz = not(Gaz)
 					#On change la couleur du Reticule
 					if Gaz :
@@ -229,16 +238,30 @@ if __name__ == '__main__':
 						Reticule = pygame.transform.scale(Reticule, (T_Reticule, T_Reticule))
 					else :
 						Reticule = pygame.image.load("../Ressources/Reticule.png").convert_alpha()
-						Reticule = pygame.transform.scale(Reticule, (T_Reticule, T_Reticule))	
+						Reticule = pygame.transform.scale(Reticule, (T_Reticule, T_Reticule))
+				if (event.type == KEYDOWN and event.key == K_LCTRL and not(Gaz)):
+					circle = not (circle)
+				if (event.type == KEYDOWN and event.key == K_LEFT and circle and not(circle_rigth)):
+					circle_left = not(circle_left)
+				if (event.type == KEYDOWN and event.key == K_RIGHT and circle and not(circle_left)):
+					circle_rigth = not(circle_rigth)
+					
 			#Fin de l'attente des evenements
 
 			#GESTION DES DEPLACEMENTS (OU PAS)
-			#D�finition de la p�riode en fonction des Gaz
+			#Definition de la periode en fonction des Gaz
 			period = 1700 - (math.fabs(Speed_Axis)*1500)
 			#Position a atteindre
 			Pos_Final = [(Ret_x - Fenetre_2)/Coeff_Dist, (Ret_y - Fenetre_2)/Coeff_Dist, 0]
 			if Gaz : 
-				robot.moveto(Pos_Final, period, 35)
+				robot.moveto(Pos_Final, period, 35, False)
+			elif circle :
+				if circle_rigth : 
+					robot.moveto([0, 50, 0], period, 35, True)
+				elif circle_left :
+					robot.moveto([0, -50, 0], period, 35, True)
+				else : 
+					robot.goto([0, 0, 0])
 			else : 
 				robot.goto(Pos_Final)
 			if is_joystick :
@@ -246,7 +269,7 @@ if __name__ == '__main__':
 				Reticulte_y = H_Fenetre/2 + (H_Fenetre/2 * joy_y_axis) -H_Reticule/2	
 				
 			
-			period = 1700 - (math.fabs(speed_axis)*1500)
+			period = 1700 - (math.fabs(Speed_Axis)*1500)
 			new_altitude = initial_altitude - ( alt_axis * alt_var)
 			update_center_pos_z(new_altitude)
 			#PYGAME Re-collage
