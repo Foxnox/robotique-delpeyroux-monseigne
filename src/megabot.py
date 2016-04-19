@@ -216,6 +216,16 @@ if __name__ == '__main__':
 					#Activation des Gaz Si clic souris, espace ou activation des Gaz
 					if (event.type == MOUSEBUTTONDOWN) or (event.type == KEYDOWN and event.key == K_SPACE) :
 						Gaz = not(Gaz)
+					if (not(Move) and Gaz):
+						if (event.type == KEYDOWN and event.key == K_LEFT):
+							circle = True
+							Left_Right_Axis = -1.0
+						elif (event.type == KEYDOWN and event.key == K_RIGHT):
+							circle = True
+							Left_Right_Axis = 1.0
+					else :
+						circle = False
+					
 				#Activation des Gaz Si clic souris, espace ou activation des Gaz
 				elif (check_Speed_Axis(Speed_Axis, Gaz)) :
 					Gaz = not(Gaz)
