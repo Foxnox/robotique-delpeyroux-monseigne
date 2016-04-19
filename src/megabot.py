@@ -16,15 +16,19 @@ Fenetre_2 = T_Fenetre/2				#Fenetre/2 souvent utilise
 T_Reticule = 50						#Taille Reticule
 Reticule_2 = T_Reticule/2			#Reticule/2 souvent utilise
 
+Initial_Altitude = -90
+Alt_Var = 20
+Alt_Axis = 0
 Limit_Dist=50						#Distance Limite
 #Ce n'est pas une limite reelle c'est utile pour avoir 
 #un ratio coherent en fonction de la position du curseur
 Coeff_Dist = Fenetre_2/Limit_Dist	#Ratio en question
-Pos_Center = [100, 0, -100]			#Position par defaut du robot
+Pos_Center = [100, 0, Initial_Altitude]			#Position par defaut du robot
 Is_Mouse = True						#Gestion de la souris
 Is_Joystick = False					#ou du Joystick (par ergonomie l'un desactive l'autre)
 Joy_X_Axis = 0						#Position du Joystick sur X
 Joy_Y_Axis = 0						#Position du Joystick sur Y
+
 
 ##********** PYGAME **********##
 #Init
@@ -37,12 +41,7 @@ L_Reticule = 50
 limit_distance=50
 coeff_distance=(L_Fenetre/2)/limit_distance
 
-initial_altitude = -90
-alt_var = 20
-center_pos = [100, 0, initial_altitude]
 
-is_mouse = True
-is_joystick = False
 
 
 #Ouverture de la fenetre Pygame
@@ -160,20 +159,20 @@ def outof ( x,  val1, val2) : # return val1 > x  or  x > val2
 
 	
 def update_center_pos_z(z):
-	center_pos[2] = z
+	Pos_Center[2] = z
 #Simplification speed
 def check_Speed_Axis (Speed_Axis, gaz) : 
-	return (outof(Speed_Axis, -0.1, 0.1) and not(gaz)) or ( between(Speed_Axis, -0.1, 0.1) and gaz )
+	return (outof(Speed_Axis, 0, 0.1) and not(gaz)) or ( between(Speed_Axis, 0, 0.1) and gaz )
 
 ##********** MAIN **********##
 if __name__ == '__main__':
 
 	#Test du joystick present
 	try:
-		Is_Joystick = True
-		Is_Mouse = False
 		joystick = pygame.joystick.Joystick(0)
 		joystick.init()
+		Is_Joystick = True
+		Is_Mouse = False
 	except:
 		Is_Joystick = False
 		Is_Mouse = True
@@ -185,11 +184,11 @@ if __name__ == '__main__':
 			m.compliant = False;
 		#Positionnement "correct" des pattes
 		leg1 = corrected_leg(megabot.leg1, 0)
-		leg2 = corrected_leg(megabot.leg2, -90)
-		leg3 = corrected_leg(megabot.leg3, -90)
+		leg2 = corrected_leg(megabot.leg2, -65)
+		leg3 = corrected_leg(megabot.leg3, -115)
 		leg4 = corrected_leg(megabot.leg4, -180)
-		leg5 = corrected_leg(megabot.leg5, 90)
-		leg6 = corrected_leg(megabot.leg6, 90)
+		leg5 = corrected_leg(megabot.leg5, 115)
+		leg6 = corrected_leg(megabot.leg6, 65)
 		#Positionnement "correct" du Robot
 		robot = corrected_robot([leg1, leg2, leg3, leg4, leg5, leg6], [leg1, leg3, leg5], [leg2, leg4, leg6])
 		#Position Initiale du Robot
@@ -199,23 +198,21 @@ if __name__ == '__main__':
 		continuer = True
 		Gaz=False
 		circle = False
-		remind_button = 0
-		button = 0
-		joy_x_axis = 0
-		joy_y_axis = 0
-		Speed_Axis = 0.8
-		alt_axis = 0
+		Joy_X_Axis = 0
+		Joy_Y_Axis = 0
+		Speed_Axis = 0.0
+		Alt_Axis = 0
 		circle_rigth = False
 		circle_left = False
 		
 		while continuer:
 			
-			if is_joystick : 
-				button = joystick.get_button(3)
-				joy_x_axis = joystick.get_axis(0)
-				joy_y_axis = joystick.get_axis(1)
-				speed_axis = joystick.get_axis(2)
-				alt_axis = joystick.get_axis(6)
+			if Is_Joystick : 
+				Joy_X_Axis = joystick.get_axis(0)
+				Joy_Y_Axis = joystick.get_axis(1)
+				Abs_Speed_Axis = joystick.get_axis(2)
+				Speed_Axis = math.fabs((Abs_Speed_Axis - 1 ) / 2 )
+				Alt_Axis = joystick.get_axis(6)
 			
 			for event in pygame.event.get():	#Attente des evenements
 				if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
@@ -230,7 +227,7 @@ if __name__ == '__main__':
 					Ret_x = event.pos[0]-Reticule_2
 					Ret_y = event.pos[1]-Reticule_2
 				#Activation des Gaz Si clic souris, espace ou activation des Gaz
-				if (event.type == MOUSEBUTTONDOWN) or (event.type == KEYDOWN and event.key == K_SPACE) or (check_Speed_Axis(Speed_Axis, Gaz) and not(is_mouse)) :
+				if (event.type == MOUSEBUTTONDOWN) or (event.type == KEYDOWN and event.key == K_SPACE) or (check_Speed_Axis(Speed_Axis, Gaz) and not(Is_Mouse)) :
 					Gaz = not(Gaz)
 					#On change la couleur du Reticule
 					if Gaz :
@@ -250,10 +247,20 @@ if __name__ == '__main__':
 
 			#GESTION DES DEPLACEMENTS (OU PAS)
 			#Definition de la periode en fonction des Gaz
-			period = 1700 - (math.fabs(Speed_Axis)*1500)
+			period = (1600 - (Speed_Axis*1500))
 			#Position a atteindre
+			print Speed_Axis
+			if Is_Joystick :
+				Ret_x = Fenetre_2 + (Fenetre_2 * Joy_X_Axis) - Reticule_2	
+				Ret_y = Fenetre_2 + (Fenetre_2 * Joy_Y_Axis) - Reticule_2
+			
 			Pos_Final = [(Ret_x - Fenetre_2)/Coeff_Dist, (Ret_y - Fenetre_2)/Coeff_Dist, 0]
-			if Gaz : 
+			
+			new_altitude = Initial_Altitude - ( Alt_Axis * Alt_Var)
+			
+			update_center_pos_z(new_altitude)
+			
+			if Gaz  and (outof(Joy_X_Axis, -0.1, 0.1) or outof(Joy_Y_Axis, -0.1, 0.1)): 
 				robot.moveto(Pos_Final, period, 35, False)
 			elif circle :
 				if circle_rigth : 
@@ -264,14 +271,8 @@ if __name__ == '__main__':
 					robot.goto([0, 0, 0])
 			else : 
 				robot.goto(Pos_Final)
-			if is_joystick :
-				Reticulte_x = L_Fenetre/2 + (L_Fenetre/2 * joy_x_axis) -L_Reticule/2		
-				Reticulte_y = H_Fenetre/2 + (H_Fenetre/2 * joy_y_axis) -H_Reticule/2	
-				
 			
-			period = 1700 - (math.fabs(Speed_Axis)*1500)
-			new_altitude = initial_altitude - ( alt_axis * alt_var)
-			update_center_pos_z(new_altitude)
+			
 			#PYGAME Re-collage
 			fenetre.blit(fond, (0,0))	
 			fenetre.blit(Reticule, (Ret_x, Ret_y))
