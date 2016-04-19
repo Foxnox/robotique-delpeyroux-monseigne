@@ -11,7 +11,12 @@ Beta = radians(5.06)	#Get the radian angle for beta
 
 # return opppisite angle of the side a of the triangle defined by a, b and c 
 def al_kashi (a, b , c):
-	return acos((b*b + c*c - a*a)/(2 * b * c))
+	x = (b*b + c*c - a*a)/(2 * b * c)
+	if (x < -1 ) : 
+		x = -1
+	elif (x > 1) : 
+		x = 1
+	return acos(x)
 	
 # Inverse kinematic. Return the three angles (theta1, theta2, theta3) according the given position 
 def leg_ik(x, y, z, l1=L1, l2=L2, l3=L3, alpha = Alpha, beta = Beta):

@@ -187,9 +187,10 @@ if __name__ == '__main__':
 		Joy_Y_Axis = 0			#Axe Y du Joystick
 		Speed_Axis = 0.0		#Axe des Gaz du Joystick
 		Alt_Axis = 0			#Axe de l'altitude
+		Robot_X = 0
+		Robot_Y = 0
 		
 		while Continue:
-			
 			if Is_Joystick : 
 				Joy_X_Axis = joystick.get_axis(0)
 				Joy_Y_Axis = joystick.get_axis(1)
@@ -199,6 +200,7 @@ if __name__ == '__main__':
 				Left_Right_Axis = joystick.get_axis(5)
 				Ret_x = Fenetre_2 + (Fenetre_2 * Joy_X_Axis) - Reticule_2	
 				Ret_y = Fenetre_2 + (Fenetre_2 * Joy_Y_Axis) - Reticule_2
+					
 
 			for event in pygame.event.get():	#Attente des evenements
 				if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
@@ -209,6 +211,7 @@ if __name__ == '__main__':
 							Is_Mouse = not(Is_Mouse)
 				#Mouvement de la souris si elle est utilisee
 				if Is_Mouse : 
+					Speed_Axis=0.9
 					if event.type == MOUSEMOTION :
 						#On change les coordonnees du Reticule
 						Ret_x = event.pos[0]-Reticule_2
@@ -217,37 +220,37 @@ if __name__ == '__main__':
 					if (event.type == MOUSEBUTTONDOWN) or (event.type == KEYDOWN and event.key == K_SPACE) :
 						Gaz = not(Gaz)
 					if (not(Move) and Gaz):
-						if (event.type == KEYDOWN and event.key == K_LEFT):
-							circle = True
+						if (pygame.key.get_pressed()[K_LEFT]):
 							Left_Right_Axis = -1.0
-						elif (event.type == KEYDOWN and event.key == K_RIGHT):
-							circle = True
+						elif (pygame.key.get_pressed()[K_RIGHT]):
 							Left_Right_Axis = 1.0
-					else :
-						circle = False
-					
+						else :
+							Left_Right_Axis = 0.0			
 				#Activation des Gaz Si clic souris, espace ou activation des Gaz
 				elif (check_Speed_Axis(Speed_Axis, Gaz)) :
 					Gaz = not(Gaz)
-				if (Gaz and (outof(Joy_X_Axis, -0.1, 0.1) or outof(Joy_Y_Axis, -0.1, 0.1))) : 
-					Move = True
-				else : 
-					Move = False					
-				if (not(Move) and Gaz and outof(Left_Right_Axis, -0.1, 0.1)):
-					circle = True
-				else :
-					circle = False
-
 			#Fin de l'attente des evenements
+
 
 			#GESTION DES DEPLACEMENTS (OU PAS)
 			#Definition de la periode en fonction des Gaz
 			period = (1500*(1-Speed_Axis)) + 100
 			#Position a atteindre
-			Pos_Final = [(Ret_x - Fenetre_2)/Coeff_Dist, (Ret_y - Fenetre_2)/Coeff_Dist, 0]
+			Robot_X = (Ret_x - Fenetre_2)/Coeff_Dist
+			Robot_Y = (Ret_y - Fenetre_2)/Coeff_Dist
+			Pos_Final = [ Robot_X, Robot_Y, 0]
 			new_altitude = Initial_Altitude - ( Alt_Axis * Alt_Var)
 			update_center_pos_z(new_altitude)
 			new_rotation_pos = [0, -50 * Left_Right_Axis, 0]
+			
+			if (Gaz and (outof(Robot_X, -5, 5) or outof(Robot_Y, -5, 5))) : 
+				Move = True
+			else : 
+				Move = False
+			if (not(Move) and Gaz and outof(Left_Right_Axis, -0.1, 0.1)):
+				circle = True
+			else :
+				circle = False
 			
 			if Move : 
 				robot.moveto(Pos_Final, period, 35, False)
