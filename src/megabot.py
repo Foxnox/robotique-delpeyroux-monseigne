@@ -29,6 +29,8 @@ Is_Joystick = False					#ou du Joystick (par ergonomie l'un desactive l'autre)
 Joy_X_Axis = 0						#Position du Joystick sur X
 Joy_Y_Axis = 0						#Position du Joystick sur Y
 
+Left_Right_Axis = 0
+
 
 ##********** PYGAME **********##
 #Init
@@ -194,18 +196,16 @@ if __name__ == '__main__':
 		#Position Initiale du Robot
 		robot.goto([0, 0, 0])
 	
-		
-		continuer = True
+		Move = False
+		Continue = True
 		Gaz=False
 		circle = False
 		Joy_X_Axis = 0
 		Joy_Y_Axis = 0
 		Speed_Axis = 0.0
 		Alt_Axis = 0
-		circle_rigth = False
-		circle_left = False
 		
-		while continuer:
+		while Continue:
 			
 			if Is_Joystick : 
 				Joy_X_Axis = joystick.get_axis(0)
@@ -213,6 +213,7 @@ if __name__ == '__main__':
 				Abs_Speed_Axis = joystick.get_axis(2)
 				Speed_Axis = math.fabs((Abs_Speed_Axis - 1 ) / 2 )
 				Alt_Axis = joystick.get_axis(6)
+				Left_Right_Axis = joystick.get_axis(5)
 			
 			for event in pygame.event.get():	#Attente des evenements
 				if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
@@ -234,22 +235,23 @@ if __name__ == '__main__':
 						Reticule = pygame.image.load("../Ressources/Red_Reticule.png").convert_alpha()
 						Reticule = pygame.transform.scale(Reticule, (T_Reticule, T_Reticule))
 					else :
+						Move = False
 						Reticule = pygame.image.load("../Ressources/Reticule.png").convert_alpha()
 						Reticule = pygame.transform.scale(Reticule, (T_Reticule, T_Reticule))
-				if (event.type == KEYDOWN and event.key == K_LCTRL and not(Gaz)):
-					circle = not (circle)
-				if (event.type == KEYDOWN and event.key == K_LEFT and circle and not(circle_rigth)):
-					circle_left = not(circle_left)
-				if (event.type == KEYDOWN and event.key == K_RIGHT and circle and not(circle_left)):
-					circle_rigth = not(circle_rigth)
-					
+				if (Gaz and (outof(Joy_X_Axis, -0.1, 0.1) or outof(Joy_Y_Axis, -0.1, 0.1))) : 
+					Move = True
+				else : 
+					Move = False					
+				if (not(Move) and Gaz and outof(Left_Right_Axis, -0.1, 0.1)):
+					circle = True
+				else :
+					circle = False
 			#Fin de l'attente des evenements
 
 			#GESTION DES DEPLACEMENTS (OU PAS)
 			#Definition de la periode en fonction des Gaz
-			period = (1600 - (Speed_Axis*1500))
+			period = (1500*(1-Speed_Axis)) + 100
 			#Position a atteindre
-			print Speed_Axis
 			if Is_Joystick :
 				Ret_x = Fenetre_2 + (Fenetre_2 * Joy_X_Axis) - Reticule_2	
 				Ret_y = Fenetre_2 + (Fenetre_2 * Joy_Y_Axis) - Reticule_2
@@ -260,15 +262,12 @@ if __name__ == '__main__':
 			
 			update_center_pos_z(new_altitude)
 			
-			if Gaz  and (outof(Joy_X_Axis, -0.1, 0.1) or outof(Joy_Y_Axis, -0.1, 0.1)): 
+			new_rotation_pos = [0, -50 * Left_Right_Axis, 0]
+			
+			if Move : 
 				robot.moveto(Pos_Final, period, 35, False)
 			elif circle :
-				if circle_rigth : 
-					robot.moveto([0, 50, 0], period, 35, True)
-				elif circle_left :
-					robot.moveto([0, -50, 0], period, 35, True)
-				else : 
-					robot.goto([0, 0, 0])
+				robot.moveto(new_rotation_pos, period, 35, True)
 			else : 
 				robot.goto(Pos_Final)
 			
