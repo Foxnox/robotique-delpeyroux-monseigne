@@ -245,12 +245,13 @@ if __name__ == '__main__':
 			period = (1500*(1-Speed_Axis)) + 100
 			#Goal position for the robot
 			Pos_Final = [(Ret_x - Fenetre_2)/Coeff_Dist, (Ret_y - Fenetre_2)/Coeff_Dist, 0]
+			Negative_Pos_Final = [- Pos_Final[0], -Pos_Final[1], - Pos_Final[2]]
 			new_altitude = Initial_Altitude - ( Alt_Axis * Alt_Var)
 			update_center_pos_z(new_altitude)
 			new_rotation_pos = [0, -50 * Left_Right_Axis, 0]
 
 			if Move :
-				robot.moveto(Pos_Final, period, 35, False)
+				robot.moveto(Negative_Pos_Final, period, 35, False)
 			elif circle :
 				robot.moveto(new_rotation_pos, period, 35, True)
 			else :
